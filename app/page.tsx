@@ -16,7 +16,6 @@ import {
   RotateCcw,
   SkipBack,
   SkipForward,
-  Settings,
   Square,
   Phone,
   Volume2,
@@ -297,6 +296,7 @@ export default function Home() {
   const [renderUrl, setRenderUrl] = useState("");
   const [renderFileName, setRenderFileName] = useState("dubroom-dub.mp4");
   const [renderProgress, setRenderProgress] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [, setRenderBackendStatus] = useState("ОЖИДАНИЕ ВИДЕО");
   const [, setNotice] = useState("Вставьте ссылку на публичное YouTube-видео, чтобы начать.");
   const [youtubeSourceUrl, setYoutubeSourceUrl] = useState("");
@@ -1834,22 +1834,157 @@ export default function Home() {
 
   return (
     <main className="app-shell">
-      <header className="topbar">
+      <header className="topbar header_kg">
         {/* eslint-disable-next-line @next/next/no-img-element -- next/image triggers a duplicate React runtime in vinext dev. */}
-        <a className="brand" href="https://kupigolos.ru/" aria-label="КупиГолос, основной сайт"><img className="brand-logo" src="/kupigolos-logo.svg" alt="КупиГолос" width="109" height="51" /></a>
+        <a className="brand header_logo" href="https://kupigolos.ru/" aria-label="КупиГолос, основной сайт">
+          <img className="brand-logo" src="/kupigolos-logo.svg" alt="КупиГолос" width="109" height="51" />
+        </a>
+
         <nav className="topbar-nav" aria-label="Разделы КупиГолос">
-          <a href="https://kupigolos.ru/ozvuchka-video">Услуги</a>
-          <a href="https://kupigolos.ru/diktory">Дикторы</a>
-          <a className="active" href="https://kupigolos.ru/ai"><span aria-hidden="true">▮▮</span> ИИ сервисы</a>
-          <a href="https://info.kupigolos.ru/">Инфопортал</a>
-          <a href="https://kupigolos.ru/articles">Статьи</a>
+          <div className="header_menu_chapter">
+            <a className="header_nav_link" href="https://kupigolos.ru/ozvuchka-video">Услуги</a>
+            <div className="header_dropdown_popup">
+              <div className="header_dropdown_col">
+                <strong className="header_dropdown_title">Озвучка видео</strong>
+                <a href="https://kupigolos.ru/ozvuchka-filmov">Фильмов и сериалов</a>
+                <a href="https://kupigolos.ru/ozvuchka-multfilmov">Мультфильмов</a>
+                <a href="https://kupigolos.ru/ozvuchka-video-youtube">YouTube каналов</a>
+                <a href="https://kupigolos.ru/ozvuchka-videoreklamy">Видеорекламы</a>
+              </div>
+              <div className="header_dropdown_col">
+                <strong className="header_dropdown_title">Работа с аудио</strong>
+                <a href="https://kupigolos.ru/ozvuchka-igr">Озвучка игр</a>
+                <a href="https://kupigolos.ru/ozvuchka-reklamy">Озвучка рекламы</a>
+                <a href="https://kupigolos.ru/audiogidy">Запись аудиогидов</a>
+                <a href="https://kupigolos.ru/audioknigi">Запись аудиокниг</a>
+              </div>
+              <div className="header_dropdown_col">
+                <strong className="header_dropdown_title">Локализация</strong>
+                <a href="https://kupigolos.ru/perevod">Перевод и укладка</a>
+                <a href="https://kupigolos.ru/perevod-i-ozvuchka-video">Перевод видео</a>
+                <a href="https://kupigolos.ru/lokalizaciya-igr">Перевод игр</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="header_menu_chapter">
+            <a className="header_nav_link" href="https://kupigolos.ru/diktory">Дикторы</a>
+            <div className="header_dropdown_popup">
+              <div className="header_dropdown_col">
+                <strong className="header_dropdown_title">База дикторов</strong>
+                <a href="https://kupigolos.ru/diktory">Все дикторы</a>
+                <a href="https://kupigolos.ru/diktory/dubbing">Актёры озвучки</a>
+                <a href="https://kupigolos.ru/diktory/inostrannye_golosa">Иностранные дикторы</a>
+                <a href="https://kupigolos.ru/diktory/izvestnye_golosa">Федеральные голоса</a>
+                <a href="https://kupigolos.ru/diktory/ai">ИИ голоса</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="header_menu_chapter">
+            <a className="header_nav_link header_nav_ai active" href="https://kupigolos.ru/ai">
+              <svg className="header_ai_wave" viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                <rect x="2" y="6" width="2.5" height="6" rx="1.25" fill="currentColor" />
+                <rect x="7.75" y="2" width="2.5" height="14" rx="1.25" fill="currentColor" />
+                <rect x="13.5" y="5" width="2.5" height="8" rx="1.25" fill="currentColor" />
+              </svg>
+              <span>ИИ сервисы</span>
+            </a>
+            <div className="header_dropdown_popup header_dropdown_ai">
+              <div className="header_dropdown_col">
+                <strong className="header_dropdown_title">Голос и звук</strong>
+                <a href="https://kupigolos.ru/ai">Аудио платформа</a>
+                <a href="https://kupigolos.ru/ai/voice/ai-voice-generator">Генератор голоса</a>
+                <a href="https://kupigolos.ru/ai/voice/text-to-speech">Озвучка текста</a>
+                <a href="https://kupigolos.ru/ai/dubbing-video">Озвучка видео</a>
+              </div>
+              <div className="header_dropdown_col">
+                <strong className="header_dropdown_title">Инструменты</strong>
+                <a href="https://kupigolos.ru/ai/music/ai-music-generator">Генератор музыки</a>
+                <a href="https://kupigolos.ru/ai/audio-tools/vocal-remover">Удаление вокала</a>
+                <a href="https://kupigolos.ru/ai/transcription">Транскрибация</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="header_menu_chapter">
+            <a className="header_nav_link" href="https://info.kupigolos.ru/">Инфопортал</a>
+            <div className="header_dropdown_popup">
+              <div className="header_dropdown_col">
+                <strong className="header_dropdown_title">Инфопортал</strong>
+                <a href="https://kupigolos.ru/kto-ozvuchivaet">Кто озвучивает</a>
+                <a href="https://info.kupigolos.ru/">Что посмотреть</a>
+              </div>
+            </div>
+          </div>
+
+          <a className="header_nav_link" href="https://kupigolos.ru/articles">Статьи</a>
         </nav>
-        <div className="top-actions" aria-label="Быстрые действия">
-          <a className="topbar-icon-link topbar-action-optional" href="tel:88002004551" aria-label="Позвонить 8 800 200-45-51" title="Позвонить"><Phone size={17} /></a>
-          <a className="topbar-icon-link topbar-action-optional" href="https://telegram.dog/kupigolos_channel" aria-label="Канал КупиГолос в Telegram" title="Telegram"><MessageCircle size={17} /></a>
-          <a className="topbar-icon-link topbar-action-optional" href="https://kupigolos.ru/favourites" aria-label="Избранные дикторы" title="Избранное"><Heart size={17} /></a>
-          <a className="topbar-icon-link" href="/admin" aria-label="Админ-панель" title="Админ-панель"><Settings size={17} /></a>
-          <a className="topbar-menu-link" href="https://kupigolos.ru/" aria-label="Открыть основной сайт КупиГолос" title="Основной сайт"><Menu size={32} /></a>
+
+        <div className="top-actions header_right_block" aria-label="Быстрые действия">
+          <div className="header_action_item header_phone_wrapper">
+            <a className="topbar-icon-link topbar-action-optional" href="tel:88002004551" aria-label="Позвонить 8 800 200-45-51" title="8 800 200-45-51">
+              <Phone size={17} />
+            </a>
+            <div className="header_action_popup header_phone_popup">
+              <a className="header_phone_popup_num" href="tel:88002004551">8 800 200-45-51</a>
+              <span className="header_phone_popup_sub">Бесплатно по всей России</span>
+              <span className="header_phone_popup_hours">Пн–Вс с 9:00 до 21:00</span>
+              <a className="header_phone_popup_btn" href="tel:88002004551">Позвонить</a>
+            </div>
+          </div>
+
+          <div className="header_action_item header_msg_wrapper">
+            <a className="topbar-icon-link topbar-action-optional" href="https://telegram.dog/kupigolos_channel" target="_blank" rel="noopener noreferrer" aria-label="Канал КупиГолос в Telegram" title="Мессенджеры">
+              <MessageCircle size={17} />
+            </a>
+            <div className="header_action_popup header_msg_popup">
+              <span className="header_msg_popup_title">Напишите нам</span>
+              <a className="header_msg_link" href="https://telegram.dog/studio_kupigolos" target="_blank" rel="noopener noreferrer">
+                <span className="msg-dot tg" /> Telegram
+              </a>
+              <a className="header_msg_link" href="https://wa.me/79302125534" target="_blank" rel="noopener noreferrer">
+                <span className="msg-dot wa" /> WhatsApp
+              </a>
+            </div>
+          </div>
+
+          <a className="topbar-icon-link topbar-action-optional" href="https://kupigolos.ru/favourites" target="_blank" rel="noopener noreferrer" aria-label="Избранные дикторы" title="Избранное">
+            <Heart size={17} />
+          </a>
+
+          <div className="header_action_item header_burger_wrapper">
+            <button
+              className="topbar-menu-link header_burger_btn"
+              type="button"
+              aria-label="Меню сайта"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <div className="burger_bars">
+                <span />
+                <span />
+                <span />
+              </div>
+            </button>
+            <div className={`header_action_popup header_burger_popup ${menuOpen ? "open" : ""}`}>
+              <a className="header_burger_account" href="https://kupigolos.ru/login" target="_blank" rel="noopener noreferrer">Личный кабинет</a>
+              <div className="header_burger_line" />
+              <a href="https://kupigolos.ru/price" target="_blank" rel="noopener noreferrer">Цены</a>
+              <a href="https://kupigolos.ru/oplata" target="_blank" rel="noopener noreferrer">Оплата</a>
+              <a href="https://kupigolos.ru/voprosy-i-otvety" target="_blank" rel="noopener noreferrer">FAQ</a>
+              <a href="https://kupigolos.ru/studio" target="_blank" rel="noopener noreferrer">О студии</a>
+              <a href="https://kupigolos.ru/contacts" target="_blank" rel="noopener noreferrer">Контакты</a>
+              <div className="header_burger_mobile_links">
+                <div className="header_burger_line" />
+                <a href="https://kupigolos.ru/ozvuchka-video">Услуги</a>
+                <a href="https://kupigolos.ru/diktory">Дикторы</a>
+                <a href="https://kupigolos.ru/ai">ИИ сервисы</a>
+                <a href="https://info.kupigolos.ru/">Инфопортал</a>
+                <a href="https://kupigolos.ru/articles">Статьи</a>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 

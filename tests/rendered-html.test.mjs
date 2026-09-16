@@ -96,7 +96,7 @@ test("uses the Kupigolos navigation header", async () => {
   assert.match(page, /ИИ сервисы<\/a>/);
   assert.match(page, />Инфопортал<\/a>/);
   assert.match(page, />Статьи<\/a>/);
-  assert.match(page, /href="\/admin" aria-label="Админ-панель"/);
+  assert.doesNotMatch(page, /href="\/admin"/);
 });
 
 test("keeps recommendations in one scrollable row with arrow controls", async () => {
