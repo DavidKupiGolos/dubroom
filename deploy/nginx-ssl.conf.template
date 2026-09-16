@@ -1,0 +1,148 @@
+limit_req_zone $binary_remote_addr zone=dubroom_project_create:10m rate=120r/m;
+limit_conn_zone $binary_remote_addr zone=dubroom_per_ip:10m;
+
+map $http_upgrade $dubroom_connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl ipv6only=on;
+    server_name __DOMAIN__;
+
+    ssl_certificate /etc/letsencrypt/live/__DOMAIN__/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/__DOMAIN__/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    client_max_body_size 1m;
+    client_body_timeout 30s;
+    send_timeout 60s;
+    limit_conn dubroom_per_ip 20;
+    limit_conn_status 429;
+    limit_req_status 429;
+
+    add_header Referrer-Policy "no-referrer" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+
+    location = /v1/metrics {
+        return 404;
+    }
+
+    location = /v1/projects {
+        client_max_body_size 64k;
+        limit_req zone=dubroom_project_create burst=5 nodelay;
+        proxy_pass http://127.0.0.1:5180;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+
+    location ~ ^/v1/projects/[^/]+/takes/[^/]+$ {
+        client_max_body_size 510m;
+        proxy_pass http://127.0.0.1:5180;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+
+    location ~ ^/v1/projects/[^/]+/(?:media/[^/]+|result/file)$ {
+        proxy_pass http://127.0.0.1:5180;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Range $http_range;
+        proxy_set_header If-Range $http_if_range;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+
+    location ~ ^/v1/recommendations/[^/]+/(?:poster|video)$ {
+        proxy_pass http://127.0.0.1:5180;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Range $http_range;
+        proxy_set_header If-Range $http_if_range;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+
+    location ^~ /v1/admin/recommendations {
+        client_max_body_size 4100m;
+        proxy_pass http://127.0.0.1:5180;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 7200s;
+    }
+
+    location /v1/ {
+        proxy_pass http://127.0.0.1:5180;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+        proxy_send_timeout 120s;
+    }
+
+    location ~ ^/api/admin/recommendations(?:/[^/]+/poster)?/?$ {
+        client_max_body_size 4100m;
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 7200s;
+        proxy_send_timeout 7200s;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $dubroom_connection_upgrade;
+        proxy_read_timeout 300s;
+    }
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name __DOMAIN__;
+    return 301 https://$host$request_uri;
+}

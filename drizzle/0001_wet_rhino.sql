@@ -1,0 +1,1 @@
+CREATE INDEX `idx_dub_projects_created_at` ON `dub_projects` (`created_at`);

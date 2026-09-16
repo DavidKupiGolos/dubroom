@@ -1,0 +1,23 @@
+[Unit]
+Description=Back up permanent Dubroom data and verify archive
+After=dubroom-api.service
+
+[Service]
+Type=oneshot
+User=dubroom
+Group=dubroom
+EnvironmentFile=/etc/dubroom/dubroom.env
+ExecStart=/usr/local/lib/dubroom/backup.sh
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ProtectHome=true
+RestrictSUIDSGID=true
+LockPersonality=true
+UMask=0027
+ReadOnlyPaths=/var/lib/dubroom/projects
+ReadWritePaths=/var/backups/dubroom
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

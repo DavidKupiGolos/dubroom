@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily backup of permanent Dubroom data
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+RandomizedDelaySec=15m
+Unit=dubroom-backup.service
+
+[Install]
+WantedBy=timers.target

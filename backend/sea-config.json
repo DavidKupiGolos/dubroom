@@ -1,0 +1,8 @@
+{
+  "main": "backend/server.cjs",
+  "output": "backend/sea-prep.blob",
+  "disableExperimentalSEAWarning": true,
+  "assets": {
+    "ffmpeg.exe": "backend/tools/ffmpeg.exe"
+  }
+}

@@ -1,0 +1,28 @@
+[Unit]
+Description=Dubroom media API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dubroom
+Group=dubroom
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=/etc/dubroom/dubroom.env
+ExecStart=/usr/bin/node server-v2/index.mjs
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ProtectHome=true
+RestrictSUIDSGID=true
+LockPersonality=true
+UMask=0027
+LimitNOFILE=65536
+ReadWritePaths=/var/lib/dubroom
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,30 @@
+[Unit]
+Description=Dubroom web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dubroom
+Group=dubroom
+WorkingDirectory=__APP_DIR__
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+EnvironmentFile=-/etc/dubroom/dubroom.env
+ExecStart=/usr/bin/npm run start -- --host 127.0.0.1 --port 3000
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ProtectHome=true
+RestrictSUIDSGID=true
+LockPersonality=true
+UMask=0027
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
