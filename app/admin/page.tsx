@@ -267,7 +267,11 @@ export default function AdminPage() {
     let cancelled = false;
     void fetch("/api/admin/session", { cache: "no-store" })
       .then(async (response) => {
-        const data = await response.json() as { authenticated?: boolean };
+        if (!response.ok) {
+          if (!cancelled) setAuthState("locked");
+          return;
+        }
+        const data = await response.json().catch(() => ({})) as { authenticated?: boolean };
         if (cancelled) return;
         if (!data.authenticated) {
           setAuthState("locked");
@@ -278,7 +282,12 @@ export default function AdminPage() {
         const failed = results.find((result) => result.status === "rejected");
         if (failed?.status === "rejected") setNotice(failed.reason instanceof Error ? failed.reason.message : "Часть данных сервера недоступна.");
       })
-      .catch(() => { if (!cancelled) setNotice("Не удалось проверить состояние сервера."); })
+      .catch(() => {
+        if (!cancelled) {
+          setNotice("Не удалось проверить состояние сервера. Введите пароль для входа.");
+          setAuthState("locked");
+        }
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
@@ -300,19 +309,23 @@ export default function AdminPage() {
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoginError("");
-    const response = await fetch("/api/admin/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    const data = await response.json() as { authenticated?: boolean; error?: string };
-    if (!response.ok || !data.authenticated) {
-      setLoginError(data.error || "Не удалось войти.");
-      return;
+    try {
+      const response = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json().catch(() => ({})) as { authenticated?: boolean; error?: string };
+      if (!response.ok || !data.authenticated) {
+        setLoginError(data.error || "Не удалось войти.");
+        return;
+      }
+      setPassword("");
+      setAuthState("authenticated");
+      await Promise.all([refreshProjects(), refreshSettings(), refreshCache(), refreshRecommendations(), refreshDeadLetters()]);
+    } catch {
+      setLoginError("Ошибка сети при попытке входа.");
     }
-    setPassword("");
-    setAuthState("authenticated");
-    await Promise.all([refreshProjects(), refreshSettings(), refreshCache(), refreshRecommendations(), refreshDeadLetters()]);
   }
 
   async function logout() {
