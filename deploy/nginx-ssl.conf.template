@@ -11,8 +11,8 @@ server {
     listen [::]:443 ssl ipv6only=on;
     server_name __DOMAIN__;
 
-    ssl_certificate /etc/letsencrypt/live/__DOMAIN__/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/__DOMAIN__/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/__CERTIFICATE_DOMAIN__/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/__CERTIFICATE_DOMAIN__/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
