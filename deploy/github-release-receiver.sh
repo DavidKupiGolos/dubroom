@@ -33,5 +33,5 @@ cat > "${archive}"
 test -s "${archive}"
 install -d -o root -g dubroom -m 0750 "${release_root}"
 
-bash "${stage_script}" "${archive}" "${release}" "${public_api}"
+NEXT_PUBLIC_PROJECT_API="${public_api}" bash "${stage_script}" "${archive}" "${release}"
 "${release}/deploy/activate-release.sh" "${release}" "choicer.kupigolos.ru"
