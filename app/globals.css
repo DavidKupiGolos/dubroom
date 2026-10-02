@@ -559,7 +559,7 @@ h2 { font-size: 26px; }
   .youtube-source-band { width: calc(100% - 24px); margin-top: 18px; padding: 14px; }
   .youtube-source-heading { align-items: start; }
   .youtube-source-heading h2 { font-size: 20px; }
-  .youtube-source-heading > span { display: none; }
+  .youtube-source-heading > span { font-size: 10px; line-height: 1.35; text-align: right; }
   .youtube-source-form { grid-template-columns: 1fr; }
   .youtube-source-submit { min-width: 0; grid-column: auto; }
   .recommendations-band { margin-top: 16px; }

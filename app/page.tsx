@@ -1991,7 +1991,7 @@ export default function Home() {
       <section className="youtube-source-band" aria-labelledby="youtube-source-title">
         <div className="youtube-source-heading">
           <h2 id="youtube-source-title">Озвучить видео с YouTube</h2>
-          <span>ТОЛЬКО ПУБЛИЧНЫЕ ВИДЕО</span>
+          <span>ТОЛЬКО ПУБЛИЧНЫЕ ВИДЕО ДО 3 МИНУТ</span>
         </div>
         <form className="youtube-source-form" onSubmit={startYoutubeProject}>
           <label className="youtube-url-field">
