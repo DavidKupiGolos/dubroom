@@ -1,0 +1,52 @@
+name: Deploy Dubroom
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dubroom-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Configure deployment SSH key
+        env:
+          DEPLOY_KEY: ${{ secrets.DUBROOM_DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DUBROOM_DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 0700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/dubroom-deploy
+          chmod 0600 ~/.ssh/dubroom-deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 0600 ~/.ssh/known_hosts
+
+      - name: Stage and activate verified release
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          tar \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=.next \
+            --exclude=dist \
+            --exclude=.env \
+            -czf - . \
+            | ssh -i ~/.ssh/dubroom-deploy -o BatchMode=yes root@188.120.240.205 "deploy $RELEASE_SHA"

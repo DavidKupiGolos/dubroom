@@ -5,7 +5,9 @@ import path from "node:path";
 export const defaultServerSettings = Object.freeze({
   projectRetentionMinutes: 60,
   cacheRetentionHours: 72,
-  maxVideoDurationMinutes: 10,
+  // This is a cost guard, not a configurable product setting: reject longer
+  // sources before download or any ElevenLabs request can begin.
+  maxVideoDurationMinutes: 3,
   maxSourceFileMb: 2048,
   maxTakeFileMb: 100,
   maxProjects: 100,
@@ -21,7 +23,7 @@ export const defaultServerSettings = Object.freeze({
 const limits = Object.freeze({
   projectRetentionMinutes: [15, 1440],
   cacheRetentionHours: [1, 720],
-  maxVideoDurationMinutes: [1, 360],
+  maxVideoDurationMinutes: [3, 3],
   maxSourceFileMb: [50, 4096],
   maxTakeFileMb: [1, 500],
   maxProjects: [1, 10_000],
