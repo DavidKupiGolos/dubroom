@@ -141,6 +141,33 @@ test("server limits persist and reject unsafe values", () => {
     assert.throws(() => store.update({ ...store.get(), maxTotalStorageGb: 5, maxCacheStorageGb: 6 }), /invalid_setting:maxCacheStorageGb/);
     assert.throws(() => store.update({ ...store.get(), projectRetentionMinutes: 0 }), /invalid_setting:projectRetentionMinutes/);
     assert.throws(() => store.update({ ...store.get(), minFreeStorageGb: 0 }), /invalid_setting:minFreeStorageGb/);
+    assert.throws(() => store.update({ ...store.get(), maxVideoDurationMinutes: 3.01 }), /invalid_setting:maxVideoDurationMinutes/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("videos longer than three minutes are rejected before download or ElevenLabs", async () => {
+  const root = mkdtempSync(path.join(tmpdir(), "dubroom-v2-duration-limit-test-"));
+  try {
+    const calls = { download: 0, stems: 0, transcript: 0 };
+    const service = new LocalProjectService({
+      repository: new LocalProjectRepository(root),
+      pipelineMode: "real",
+      youtube: {
+        inspect: async () => ({ title: "Too long", duration: 181, videoId: "dQw4w9WgXcQ" }),
+        download: async () => { calls.download += 1; throw new Error("download_should_not_run"); },
+      },
+      elevenLabs: {
+        separateStems: async () => { calls.stems += 1; throw new Error("stems_should_not_run"); },
+        transcribe: async () => { calls.transcript += 1; throw new Error("transcript_should_not_run"); },
+      },
+    });
+    const created = service.create({ sourceUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", rightsAccepted: true });
+    const failed = await waitFor(() => service.get(created.project.id, created.token).state === "FAILED");
+    assert.equal(failed, true);
+    assert.equal(service.get(created.project.id, created.token).error, "source_duration_limit_exceeded");
+    assert.deepEqual(calls, { download: 0, stems: 0, transcript: 0 });
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

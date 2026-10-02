@@ -411,6 +411,7 @@ export class LocalProjectService {
     const entry = this.recommendationStore.get(recommendationId);
     if (!entry || !this.recommendationPrepared(entry)) throw new Error("recommendation_not_found");
     const settings = this.settingsStore.get();
+    this.assertSourceDuration(entry.duration);
     if (this.repository.list().length >= settings.maxProjects) throw new Error("project_limit_reached");
     this.assertStorageAvailable();
     const project = createProject(`/recommendations/${entry.id}`, Date.now(), settings.projectRetentionMinutes * 60 * 1000);
@@ -1132,6 +1133,12 @@ export class LocalProjectService {
     return this.sourceCache.get(source.videoId, retentionMs);
   }
 
+  assertSourceDuration(duration) {
+    if (Number(duration) > this.settingsStore.get().maxVideoDurationMinutes * 60) {
+      throw new Error("source_duration_limit_exceeded");
+    }
+  }
+
   cachePreparedProject(project, directory) {
     if (project.recommendationId) return;
     const source = parsePublicYouTubeUrl(project.sourceUrl);
@@ -1184,11 +1191,13 @@ export class LocalProjectService {
       }
       const cachedSource = this.cachedSource(project);
       if (cachedSource) {
+        this.assertSourceDuration(cachedSource.duration);
         this.reusePreparedProject(project, directory, cachedSource, cachedSource.directory, null);
         return;
       }
       const sourceProject = this.reusableProject(project);
       if (sourceProject) {
+        this.assertSourceDuration(sourceProject.duration);
         this.reusePreparedProject(project, directory, sourceProject);
         this.cachePreparedProject(project, directory);
         return;
@@ -1213,7 +1222,7 @@ export class LocalProjectService {
         complete: () => existsSync(sourcePath) || existsSync(preparedPath),
         run: async () => {
           const metadata = await this.youtube.inspect(project.sourceUrl);
-          if (metadata.duration > settings.maxVideoDurationMinutes * 60) throw new Error("source_duration_limit_exceeded");
+          this.assertSourceDuration(metadata.duration);
           project.title = metadata.title;
           project.duration = metadata.duration;
           this.update(project, 10);
@@ -1237,6 +1246,7 @@ export class LocalProjectService {
         complete: () => existsSync(preparedPath),
         run: async () => {
           const inspection = await this.media.inspect(sourcePath);
+          this.assertSourceDuration(inspection.duration);
           project.duration = inspection.duration;
           if (inspection.canCopyVideoToMp4 && inspection.videoCodec === "h264") copyFileSync(sourcePath, preparedPath);
           else await this.media.normalizeVideo(sourcePath, preparedPath);
@@ -1291,6 +1301,7 @@ export class LocalProjectService {
   async prepareRecommendationProject(project, directory) {
     const recommendation = this.recommendationStore.get(project.recommendationId);
     if (!recommendation || !this.recommendationPrepared(recommendation)) throw new Error("recommendation_not_found");
+    this.assertSourceDuration(recommendation.duration);
     const sourceProject = {
       title: recommendation.title,
       duration: recommendation.duration,
