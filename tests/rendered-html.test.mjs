@@ -99,6 +99,15 @@ test("uses the Kupigolos navigation header", async () => {
   assert.doesNotMatch(page, /href="\/admin"/);
 });
 
+test("shows the three-minute source-video limit in the form", async () => {
+  const [page, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(page, /ТОЛЬКО ПУБЛИЧНЫЕ ВИДЕО ДО 3 МИНУТ/);
+  assert.doesNotMatch(css, /\.youtube-source-heading > span \{ display: none; \}/);
+});
+
 test("keeps recommendations in one scrollable row with arrow controls", async () => {
   const [page, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
