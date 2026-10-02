@@ -3,6 +3,7 @@ set -euo pipefail
 
 release="${1:?release directory is required}"
 domain="${2:?public domain is required}"
+certificate_domain="${3:-${domain}}"
 app_path="/opt/dubroom/app"
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 previous="/opt/dubroom/releases/previous-${timestamp}"
@@ -88,7 +89,9 @@ if [[ -d "${app_path}/private" && ! -e "${release}/private" ]]; then
   cp -a -- "${app_path}/private" "${release}/private"
 fi
 
-sed "s|__DOMAIN__|${domain}|g" "${release}/deploy/nginx-ssl.conf.template" > "${temporary_dir}/nginx-dubroom"
+sed -e "s|__DOMAIN__|${domain}|g" \
+    -e "s|__CERTIFICATE_DOMAIN__|${certificate_domain}|g" \
+    "${release}/deploy/nginx-ssl.conf.template" > "${temporary_dir}/nginx-dubroom"
 sed 's|__APP_DIR__|/opt/dubroom/app|g' "${release}/deploy/dubroom-api.service" > "${temporary_dir}/dubroom-api.service"
 sed 's|__APP_DIR__|/opt/dubroom/app|g' "${release}/deploy/dubroom-web.service" > "${temporary_dir}/dubroom-web.service"
 

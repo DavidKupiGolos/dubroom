@@ -70,9 +70,18 @@ test("systemd monitor checks readiness and dead-letter metrics", async () => {
 });
 
 test("release activation supports repeat deployments and rollback", async () => {
-  const activate = await deployFile("activate-release.sh");
+  const [activate, nginx, receiver] = await Promise.all([
+    deployFile("activate-release.sh"),
+    deployFile("nginx-ssl.conf.template"),
+    deployFile("github-release-receiver.sh"),
+  ]);
   assert.match(activate, /previous="\$\(readlink -f/);
   assert.match(activate, /previous_moved=1/);
   assert.match(activate, /ln -s -- "\$\{previous\}" "\$\{app_path\}"/);
   assert.match(activate, /service_units=\(/);
+  assert.match(activate, /certificate_domain="\$\{3:-\$\{domain\}\}"/);
+  assert.match(activate, /__CERTIFICATE_DOMAIN__/);
+  assert.match(nginx, /\/etc\/letsencrypt\/live\/__CERTIFICATE_DOMAIN__\/fullchain\.pem/);
+  assert.match(receiver, /Reusing verified staged release/);
+  assert.match(receiver, /bash "\$\{release\}\/deploy\/activate-release\.sh"/);
 });
