@@ -16,7 +16,7 @@ if [[ ! "${release_sha}" =~ ^[a-f0-9]{40}$ ]]; then
   exit 64
 fi
 
-if [[ ! -x "${stage_script}" ]]; then
+if [[ ! -f "${stage_script}" ]]; then
   echo "Deployment staging script is unavailable" >&2
   exit 69
 fi
@@ -33,5 +33,5 @@ cat > "${archive}"
 test -s "${archive}"
 install -d -o root -g dubroom -m 0750 "${release_root}"
 
-"${stage_script}" "${archive}" "${release}" "${public_api}"
+bash "${stage_script}" "${archive}" "${release}" "${public_api}"
 "${release}/deploy/activate-release.sh" "${release}" "choicer.kupigolos.ru"
